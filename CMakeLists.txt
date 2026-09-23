@@ -90,6 +90,16 @@ else()
         "${CMAKE_CURRENT_SOURCE_DIR}/lib/*"
     )
 
+    # Make all discovered library headers available while configuring any
+    # library. This allows libraries to depend on sibling libraries in lib/.
+    file(GLOB AVR_AUTO_LIB_INCLUDE_DIRS CONFIGURE_DEPENDS LIST_DIRECTORIES true
+        "${CMAKE_CURRENT_SOURCE_DIR}/lib/*/include"
+    )
+
+    if(AVR_AUTO_LIB_INCLUDE_DIRS)
+        include_directories(${AVR_AUTO_LIB_INCLUDE_DIRS})
+    endif()
+
     set(AVR_AUTO_LIBRARIES)
 
     foreach(LIB_DIR IN LISTS LIB_DIRECTORIES)
@@ -118,7 +128,9 @@ else()
     if(AVR_AUTO_LIBRARIES)
         target_link_libraries(${PROJECT_NAME}.elf
             PRIVATE
+                "-Wl,--start-group"
                 ${AVR_AUTO_LIBRARIES}
+                "-Wl,--end-group"
         )
     endif()
 
